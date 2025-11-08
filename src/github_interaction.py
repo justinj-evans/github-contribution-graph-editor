@@ -1,25 +1,21 @@
 import os
-import random
-import datetime
-import shutil
-from git import Repo, GitCommandError
-import time
+from git import Repo
 import tempfile
 import subprocess
 
-import os
 from dotenv import load_dotenv
+
 
 def branch_exists(repo_url, branch_name):
     result = subprocess.run(
         ["git", "ls-remote", "--heads", repo_url, branch_name],
         capture_output=True,
-        text=True
+        text=True,
     )
     return bool(result.stdout.strip())
 
-def github_upload_commits(commit_date_counts, repo_url, branch):
 
+def github_upload_commits(commit_date_counts, repo_url, branch):
     # TODO: convert .env to args method
     # Load environment variables from .env file
     load_dotenv()
@@ -27,7 +23,9 @@ def github_upload_commits(commit_date_counts, repo_url, branch):
     # Configuration variables
     REPO_URL = os.getenv("REPO_URL", "https://github.com/your-username/your-repo.git")
     BRANCH = os.getenv("GIT_BRANCH", "main")
-    COMMIT_MESSAGE = os.getenv("GIT_COMMIT_MESSAGE", "Automated commit to populate contribution graph")
+    COMMIT_MESSAGE = os.getenv(
+        "GIT_COMMIT_MESSAGE", "Automated commit to populate contribution graph"
+    )
     GIT_USERNAME = os.getenv("GIT_USERNAME", "your-username")
     GIT_EMAIL = os.getenv("GIT_EMAIL", "your-email@example.com")
     GITHUB_TOKEN = os.getenv("GITHUB_TOKEN", "")
@@ -71,8 +69,10 @@ def github_upload_commits(commit_date_counts, repo_url, branch):
                 f.write(f"Commit on {commit_date_str}\n")
 
             repo.index.add([file_path])
-            repo.index.commit(COMMIT_MESSAGE, author_date=commit_date_str, commit_date=commit_date_str)  # FIXED
+            repo.index.commit(
+                COMMIT_MESSAGE, author_date=commit_date_str, commit_date=commit_date_str
+            )  # FIXED
 
     # Push changes
-    origin = repo.remote() # name="origin"
+    origin = repo.remote()  # name="origin"
     origin.push(refspec=f"{BRANCH}:{BRANCH}", force=True)

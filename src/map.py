@@ -1,11 +1,10 @@
-
 def get_letter_map():
     """
     Returns a dictionary mapping letters and digits to their ASCII art representations.
-    
+
     Each letter or digit is represented as a list of strings, where each string corresponds
     to a row in the ASCII art representation.
-    
+
     Returns:
         dict: A dictionary mapping characters to their ASCII art representations.
     """

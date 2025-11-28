@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import calendar
 from datetime import datetime, timedelta
 
-from src.map import get_letter_map
+from map import get_letter_map
 
 # Define commit color shades (lighter means fewer commits)
 COLORS = ["#ebedf0", "#9be9a8", "#40c463", "#30a14e", "#216e39"]
@@ -105,7 +105,8 @@ def plot_commit_graph(grid):
     ax.set_frame_on(False)
     ax.set_aspect("equal")
 
-    plt.show()
+    #plt.show()
+    return fig
 
 
 def convert_grid_to_dates(data) -> list:

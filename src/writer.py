@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.patches import Rectangle
 import calendar
 from datetime import datetime, timedelta
 
@@ -52,12 +53,12 @@ def plot_commit_graph(grid):
     for y in range(8):
         for x in range(52):
             ax.add_patch(
-                plt.Rectangle((x, -y), 1, 1, ec="white", lw=2, color=COLORS[grid[y, x]])
+                Rectangle((x, -y), 1, 1, ec="white", lw=2, color=COLORS[grid[y, x]])
             )  # type: ignore
 
     # Plot legend
     for i, x in enumerate(range(47, 52)):
-        ax.add_patch(plt.Rectangle((x, -9), 1, 1, ec="white", lw=2, color=COLORS[i]))  # type: ignore
+        ax.add_patch(Rectangle((x, -9), 1, 1, ec="white", lw=2, color=COLORS[i]))  # type: ignore
     ax.text(45.5, -9, "Less", ha="center", va="bottom", fontsize=10, color="black")
     ax.text(53.5, -9, "More", ha="center", va="bottom", fontsize=10, color="black")
 

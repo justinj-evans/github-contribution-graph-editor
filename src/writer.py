@@ -50,17 +50,25 @@ def plot_commit_graph(grid):
     fig, ax = plt.subplots(figsize=(13, 3))
 
     # Plot each grid cell
-    for y in range(8):
-        for x in range(52):
+    for y in range(grid.shape[0]):
+        for x in range(grid.shape[1]):
+            # Safely map grid value to a color index to avoid IndexError
+            try:
+                val = int(grid[y, x])
+            except Exception:
+                val = 0
+            idx = min(max(val, 0), len(COLORS) - 1)
             ax.add_patch(
-                Rectangle((x, -y), 1, 1, ec="white", lw=2, color=COLORS[grid[y, x]])
+                Rectangle((x, -y), 1, 1, ec="white", lw=2, color=COLORS[idx])
             )  # type: ignore
 
-    # Plot legend
-    for i, x in enumerate(range(47, 52)):
-        ax.add_patch(Rectangle((x, -9), 1, 1, ec="white", lw=2, color=COLORS[i]))  # type: ignore
-    ax.text(45.5, -9, "Less", ha="center", va="bottom", fontsize=10, color="black")
-    ax.text(53.5, -9, "More", ha="center", va="bottom", fontsize=10, color="black")
+    # Plot legend: place one square per defined color
+    legend_start_x = 47
+    for i, color in enumerate(COLORS):
+        x_pos = legend_start_x + i
+        ax.add_patch(Rectangle((x_pos, -8), 1, 1, ec="white", lw=2, color=color))  # type: ignore
+    ax.text(legend_start_x - 1, -8, "Less", ha="center", va="bottom", fontsize=10, color="black")
+    ax.text(legend_start_x + len(COLORS) + 1, -8, "More", ha="center", va="bottom", fontsize=10, color="black")
 
     # Add Y-axis labels (Mon, Wed, Fri)
     day_labels = {1.5: "Mon", 3.5: "Wed", 5.5: "Fri"}
@@ -88,7 +96,7 @@ def plot_commit_graph(grid):
         weeks_passed += weeks_per_month
 
     for i, month in enumerate(month_labels):
-        if month_starts[i] < 52:  # Prevent overflow beyond 52 weeks
+        if month_starts[i] < 53:  # Prevent overflow beyond 52 weeks
             ax.text(
                 month_starts[i] + 1.5,
                 0.5,
@@ -127,12 +135,18 @@ def convert_grid_to_dates(data) -> list:
     # Step 2: Map dates
     dates = []
     commit_dates = []
-    for col in range(data.shape[0]):  # iterate over weeks
-        for row in range(data.shape[0]):  # iterate over days (Sunday to Saturday)
+    # data is expected shape (rows=days, cols=weeks)
+    rows = data.shape[0]
+    cols = data.shape[1]
+    for col in range(cols):  # iterate over weeks
+        for row in range(rows):  # iterate over days (Sunday to Saturday)
             day_offset = col * 7 + row
             date = start_date + timedelta(days=day_offset)
             commit_date_str = date.strftime("%Y-%m-%dT%H:%M:%S")  # FIXED format
-            value = data[row, col].astype(int)
+            try:
+                value = int(data[row, col])
+            except Exception:
+                value = 0
             dates.append((commit_date_str, value))
             if value > 0:
                 commit_dates.append((commit_date_str, value))

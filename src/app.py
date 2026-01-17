@@ -6,6 +6,7 @@ from datetime import datetime
 from writer import plot_commit_graph
 from grid import dict_to_matrix, matrix_to_dict, df_to_matrix
 from dates import year_dict
+from github_interaction import github_upload_commits
 
 # # Streamlit app
 st.title("GitHub Contribution Graph Editor")
@@ -64,7 +65,19 @@ st.session_state.commit_matrix = df_to_matrix(st.session_state.commit_df)
 fig = plot_commit_graph(st.session_state.commit_matrix)
 st.pyplot(fig)
 
-
+## Upload to Gitlab
+if st.button("Upload to Github Repository"):
+    with st.spinner("Generating commits..."):
+        # Pull secrets from expected streamlit secrets under .streamlit/secrets.toml
+        GIT_USERNAME = st.secrets["GITHUB_USERNAME"]
+        GIT_EMAIL = st.secrets["GITHUB_EMAIL"]
+        GITHUB_TOKEN = st.secrets["GITHUB_TOKEN"]
+        github_upload_commits(GITHUB_TOKEN=GITHUB_TOKEN,
+                              GIT_USERNAME=GIT_USERNAME,
+                              GIT_EMAIL=GIT_EMAIL,
+                              REPO_URL=st.secrets["REPO_URL"],
+                              commit_date_counts=st.session_state.commit_date_counts)
+        st.success("Commits uploaded successfully!", icon="✅")
 
 
 

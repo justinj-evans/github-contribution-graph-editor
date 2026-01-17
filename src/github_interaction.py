@@ -18,7 +18,7 @@ def branch_exists(repo_url, branch_name):
 
 def github_upload_commits(REPO_URL, GIT_USERNAME, GIT_EMAIL, GITHUB_TOKEN, commit_date_counts: dict):
     # Configuration variables
-    BRANCH = 'main'
+    BRANCH = 'Automation'
     COMMIT_MESSAGE = "Automated commit to populate contribution graph"
 
     # Create temporary directory manually for better control

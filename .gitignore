@@ -174,7 +174,14 @@ cython_debug/
 .pypirc
 
 # Testing folder
+<<<<<<< HEAD
 test/
 
 # Secrets
 .streamlit/
+=======
+tests/
+
+# Streamlit secrets
+secrets.toml
+>>>>>>> 2dc5c2689eca0ba3df871f47e68850c7151fa295

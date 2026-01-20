@@ -32,12 +32,17 @@ def github_upload_commits(REPO_URL, GIT_USERNAME, GIT_EMAIL, GITHUB_TOKEN, commi
         else:
             repo = Repo.clone_from(REPO_URL, temp_dir)  # default branch
 
-        # Set authenticated remote URL with token 
+        # Set authenticated remote URL with token (GitHub uses token@ not username:token@)
+        authenticated_url = REPO_URL.replace("https://", f"https://{GITHUB_TOKEN}@")
         repo.git.remote(
             "set-url",
             "origin",
-            REPO_URL.replace("https://", f"https://{GITHUB_TOKEN}@")
+            authenticated_url
         )
+        
+        # Disable credential helper to force use of embedded token in URL
+        with repo.config_writer() as git_config:
+            git_config.set_value("credential", "helper", "").release()
 
         # Define dummy file path
         file_path = os.path.join(temp_dir, "activity.log")
@@ -73,13 +78,13 @@ def github_upload_commits(REPO_URL, GIT_USERNAME, GIT_EMAIL, GITHUB_TOKEN, commi
                         COMMIT_MESSAGE, author_date=commit_date_str, commit_date=commit_date_str
                     )
 
-        # Push changes
-        origin = repo.remotes.origin
-        origin.push(
-            refspec=f"HEAD:{BRANCH}",
-            force=True
-        )
-        print(f"Pushed changes to {REPO_URL} on branch {BRANCH}")
+        # Push changes using direct git command (bypasses credential helpers)
+        try:
+            repo.git.push("origin", f"HEAD:{BRANCH}", "-f")
+            print(f"Pushed changes to {REPO_URL} on branch {BRANCH}")
+        except Exception as e:
+            print(f"Error pushing to repository: {e}")
+            raise
         
     finally:
         # Ensure git releases all locks before cleanup

@@ -61,12 +61,8 @@ st.subheader("")
 # convert df to np array expected in plot_commit_graph
 st.session_state.commit_matrix = df_to_matrix(st.session_state.commit_df)
 
-st.write(st.session_state.commit_date_counts)
-
 # convert df back to dict of date: counts
 st.session_state.commit_date_counts = matrix_to_dict(st.session_state.commit_matrix, year= datetime.now().date().year)
-
-st.write(st.session_state.commit_date_counts)
 
 # plot the committed data
 fig = plot_commit_graph(st.session_state.commit_matrix)

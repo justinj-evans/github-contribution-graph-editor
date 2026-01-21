@@ -6,6 +6,7 @@ import streamlit as st
 import shutil
 import time
 from tempfile import TemporaryDirectory
+import datetime
 
 def branch_exists(repo_url, branch_name):
     result = subprocess.run(
@@ -63,7 +64,7 @@ def github_upload_commits(REPO_URL, GIT_USERNAME, GIT_EMAIL, GITHUB_TOKEN, commi
         # commit_date_counts is a dict of date strings to number of commits
         # date_dict[day.strftime("%Y-%m-%d")] = value
         for date in commit_date_counts:
-            commit_date_str = date
+            commit_date_str = datetime.datetime.strptime(date, "%Y-%m-%d").strftime("%Y-%m-%d 12:00:00") # github expects a datetime format, not string date 'YYYY-MM-DD'
             num_commits = commit_date_counts[date]
 
             # only submit if commit count > 0

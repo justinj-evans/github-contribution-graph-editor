@@ -61,23 +61,39 @@ st.subheader("")
 # convert df to np array expected in plot_commit_graph
 st.session_state.commit_matrix = df_to_matrix(st.session_state.commit_df)
 
+# convert df back to dict of date: counts
+st.session_state.commit_date_counts = matrix_to_dict(st.session_state.commit_matrix, year= datetime.now().date().year)
+
 # plot the committed data
 fig = plot_commit_graph(st.session_state.commit_matrix)
 st.pyplot(fig)
 
+## Metrics Display
+st.metric(label="Total Contributions", value=sum(st.session_state.commit_date_counts.values()))
+
 ## Upload to Gitlab
-if st.button("Upload to Github Repository"):
-    with st.spinner("Generating commits..."):
-        # Pull secrets from expected streamlit secrets under .streamlit/secrets.toml
-        GIT_USERNAME = st.secrets["GITHUB_USERNAME"]
-        GIT_EMAIL = st.secrets["GITHUB_EMAIL"]
-        GITHUB_TOKEN = st.secrets["GITHUB_TOKEN"]
-        github_upload_commits(GITHUB_TOKEN=GITHUB_TOKEN,
-                              GIT_USERNAME=GIT_USERNAME,
-                              GIT_EMAIL=GIT_EMAIL,
-                              REPO_URL=st.secrets["REPO_URL"],
-                              commit_date_counts=st.session_state.commit_date_counts)
-        st.success("Commits uploaded successfully!", icon="✅")
+st.subheader("Upload to GitHub Repository")
+
+if sum(st.session_state.commit_date_counts.values()) > 0:
+    # check to see if streamlit secrets are set
+    if "GITHUB_USERNAME" in st.secrets and "GITHUB_EMAIL" in st.secrets and "GITHUB_TOKEN" in st.secrets and "REPO_URL" in st.secrets:
+        if st.button("Upload to Github Repository"):
+            with st.spinner("Generating commits..."):
+
+                # Pull secrets from expected streamlit secrets under .streamlit/secrets.toml
+                GIT_USERNAME = st.secrets["GITHUB_USERNAME"]
+                GIT_EMAIL = st.secrets["GITHUB_EMAIL"]
+                GITHUB_TOKEN = st.secrets["GITHUB_TOKEN"]
+                github_upload_commits(GITHUB_TOKEN=GITHUB_TOKEN,
+                                    GIT_USERNAME=GIT_USERNAME,
+                                    GIT_EMAIL=GIT_EMAIL,
+                                    REPO_URL=st.secrets["REPO_URL"],
+                                    commit_date_counts=st.session_state.commit_date_counts)
+                st.success("Commits uploaded successfully!", icon="✅")
+    else:
+        st.warning("GitHub credentials not found in Streamlit secrets. Please add GITHUB_USERNAME, GITHUB_EMAIL, GITHUB_TOKEN, and REPO_URL to .streamlit/secrets.toml", icon="⚠️")
+else:
+    st.info("Add at least one contribution required to enable upload to Github Repository.", icon="ℹ️")
 
 
 

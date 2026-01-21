@@ -37,5 +37,5 @@ def matrix_to_dict(matrix, year):
         for weekday in range(7):
             day = start + pd.to_timedelta(week*7 + weekday - start.weekday(), "D")
             if matrix[weekday, week] > 0:
-                contrib_dict[str(day.date())] = matrix[weekday, week]
+                contrib_dict[str(day.date())] = int(matrix[weekday, week]) # force to int for json serialization, is num commits
     return contrib_dict

@@ -1,6 +1,8 @@
 # GitHub Contribution Graph Editor
 
-A Python tool to create custom patterns and messages on your GitHub contribution graph. This project provides an interactive Streamlit web app for designing and uploading commits that form visual patterns on your GitHub profile.
+Customize patterns and messages on your GitHub contribution graph. This project provides an interactive Streamlit web app for designing and uploading commits that form visual patterns on your GitHub profile.
+
+![](docs/contribution_graph_heart.png)
 
 ## Features
 

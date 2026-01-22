@@ -76,22 +76,31 @@ st.subheader("Upload to GitHub Repository")
 
 if sum(st.session_state.commit_date_counts.values()) > 0:
     # check to see if streamlit secrets are set
-    if "GITHUB_USERNAME" in st.secrets and "GITHUB_EMAIL" in st.secrets and "GITHUB_TOKEN" in st.secrets and "REPO_URL" in st.secrets:
-        if st.button("Upload to Github Repository"):
-            with st.spinner("Generating commits..."):
+    try:
+        st.secrets["GITHUB_USERNAME"]
+        st.secrets["GITHUB_EMAIL"]
+        st.secrets["GITHUB_TOKEN"]
+        st.secrets["REPO_URL"]
+        if "GITHUB_USERNAME" in st.secrets and "GITHUB_EMAIL" in st.secrets and "GITHUB_TOKEN" in st.secrets and "REPO_URL" in st.secrets:
+            
+            # upload button and trigger github upload push
+            if st.button("Upload to Github Repository"):
+                with st.spinner("Generating commits..."):
 
-                # Pull secrets from expected streamlit secrets under .streamlit/secrets.toml
-                GIT_USERNAME = st.secrets["GITHUB_USERNAME"]
-                GIT_EMAIL = st.secrets["GITHUB_EMAIL"]
-                GITHUB_TOKEN = st.secrets["GITHUB_TOKEN"]
-                github_upload_commits(GITHUB_TOKEN=GITHUB_TOKEN,
-                                    GIT_USERNAME=GIT_USERNAME,
-                                    GIT_EMAIL=GIT_EMAIL,
-                                    REPO_URL=st.secrets["REPO_URL"],
-                                    commit_date_counts=st.session_state.commit_date_counts)
-                st.success("Commits uploaded successfully!", icon="✅")
-    else:
-        st.warning("GitHub credentials not found in Streamlit secrets. Please add GITHUB_USERNAME, GITHUB_EMAIL, GITHUB_TOKEN, and REPO_URL to .streamlit/secrets.toml", icon="⚠️")
+                    # Pull secrets from expected streamlit secrets under .streamlit/secrets.toml
+                    GIT_USERNAME = st.secrets["GITHUB_USERNAME"]
+                    GIT_EMAIL = st.secrets["GITHUB_EMAIL"]
+                    GITHUB_TOKEN = st.secrets["GITHUB_TOKEN"]
+                    github_upload_commits(GITHUB_TOKEN=GITHUB_TOKEN,
+                                        GIT_USERNAME=GIT_USERNAME,
+                                        GIT_EMAIL=GIT_EMAIL,
+                                        REPO_URL=st.secrets["REPO_URL"],
+                                        commit_date_counts=st.session_state.commit_date_counts)
+                    st.success("Commits uploaded successfully!", icon="✅")
+        else:
+            st.warning("GitHub credentials not found in Streamlit secrets. Please add GITHUB_USERNAME, GITHUB_EMAIL, GITHUB_TOKEN, and REPO_URL to .streamlit/secrets.toml", icon="⚠️")
+    except:
+        st.warning("Please ensure Github credentials are properly configured in .streamlit/secrets.toml", icon="⚠️")
 else:
     st.info("Add at least one contribution required to enable upload to Github Repository.", icon="ℹ️")
 

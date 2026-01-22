@@ -49,6 +49,9 @@ st.session_state.commit_df = st.data_editor(
     hide_index=True,
     column_config={
         col: st.column_config.NumberColumn(
+            min_value=0,
+            max_value=4,
+            step=1,
             width="small",
             disabled=False
         ) for col in st.session_state.commit_df.columns

@@ -15,9 +15,10 @@ st.title("GitHub Contribution Graph Editor")
 st.set_page_config(layout="wide")
 
 ## Data Structure : Dict of Dates to Counts
-st.session_state.commit_date_counts = year_dict()
-st.session_state.commit_matrix = dict_to_matrix(st.session_state.commit_date_counts)
-st.session_state.commit_df = pd.DataFrame(st.session_state.commit_matrix[1:,:])  # exclude empty top row
+if "commit_date_counts" not in st.session_state:
+    st.session_state.commit_date_counts = year_dict()
+    st.session_state.commit_matrix = dict_to_matrix(st.session_state.commit_date_counts)
+    st.session_state.commit_df = pd.DataFrame(st.session_state.commit_matrix[1:,:])  # exclude empty top row
 
 ## User Input Variables
 with st.container(border=False):
@@ -29,7 +30,6 @@ with st.container(border=False):
             st.session_state.commit_df = pd.DataFrame(
                 np.random.randint(0, 4, size=(7, 52))
             )
-            st.session_state.commit_date_counts = matrix_to_dict(st.session_state.commit_df.values, year= datetime.now().date().year)
 
     # reset commit graph data
     with v2:
@@ -44,8 +44,9 @@ st.subheader("Manually Edit")
 st.write("Edit the number of contributions (0-4) for each day in the grid below:")
 
 ## display editable dataframe
-st.session_state.commit_df = st.data_editor(
+st.session_state.interactive_commit_df = st.data_editor(
     st.session_state.commit_df,
+    key="contribution_grid",
     hide_index=True,
     column_config={
         col: st.column_config.NumberColumn(
@@ -62,7 +63,7 @@ st.session_state.commit_df = st.data_editor(
 st.subheader("")
 
 # convert df to np array expected in plot_commit_graph
-st.session_state.commit_matrix = df_to_matrix(st.session_state.commit_df)
+st.session_state.commit_matrix = df_to_matrix(st.session_state.interactive_commit_df)
 
 # convert df back to dict of date: counts
 st.session_state.commit_date_counts = matrix_to_dict(st.session_state.commit_matrix, year= datetime.now().date().year)

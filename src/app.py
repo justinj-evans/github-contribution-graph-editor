@@ -5,7 +5,7 @@ from datetime import datetime
 
 from writer import plot_commit_graph
 from grid import dict_to_matrix, matrix_to_dict, df_to_matrix
-from dates import year_dict
+from dates import year_dict, github_contribution_api, convert_api_response_to_dict, safe_date_dict_merge
 from github_interaction import github_upload_commits
 
 # # Streamlit app
@@ -21,9 +21,26 @@ if "commit_date_counts" not in st.session_state:
     st.session_state.commit_df = pd.DataFrame(st.session_state.commit_matrix[1:,:])  # exclude empty top row
 
 ## User Input Variables
+# Github Username
+with st.form("github_username_form", clear_on_submit=False):
+    username = st.text_input("GitHub Username:", key="github_username", on_change=None)
+    submitted = st.form_submit_button("Submit")
+
+if submitted and st.session_state.github_username:
+    with st.spinner("Pulling commit history..."):
+        response = github_contribution_api(st.session_state.github_username)
+        if response['error']:
+            st.error(f"Failed to fetch data for user: {st.session_state.github_username}. Please check the username and try again.", icon="❌")
+        elif response != {}:
+            api_date_dict = convert_api_response_to_dict(response) 
+            st.success(f"Successfully pulled {sum(st.session_state.commit_date_counts.values())} contributions user: {st.session_state.github_username}", icon="✅")
+            st.session_state.commit_date_counts = safe_date_dict_merge(st.session_state.commit_date_counts, api_date_dict)
+            st.session_state.commit_matrix = dict_to_matrix(st.session_state.commit_date_counts)
+            st.session_state.commit_df = pd.DataFrame(st.session_state.commit_matrix[1:,:])  # exclude empty top row
+
 with st.container(border=False):
 
-# random fill toggle
+    # random fill toggle
     v1, v2 = st.columns(2,gap='small')
     with v1:
         if st.button("Random Fill Contributions"):

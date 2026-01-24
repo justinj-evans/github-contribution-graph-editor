@@ -98,8 +98,8 @@ st.session_state.submit_commit_date_count = subtract_date_dicts(dict1=st.session
 ## Metrics Display
 st.metric(label="Total Contributions", value=sum(st.session_state.commit_date_counts.values()))
 st.metric(label="Manual Contributions Added", value=sum(st.session_state.submit_commit_date_count.values()))
-print(st.session_state.submit_commit_date_count)
-print(st.session_state.commit_date_counts)
+print(sum(st.session_state.submit_commit_date_count.values()))
+print(sum(st.session_state.commit_date_counts.values()))
 
 ## Upload to Gitlab
 st.subheader("Upload to GitHub Repository")
@@ -107,10 +107,6 @@ st.subheader("Upload to GitHub Repository")
 if sum(st.session_state.commit_date_counts.values()) > 0:
     # check to see if streamlit secrets are set
     try:
-        st.secrets["GITHUB_USERNAME"]
-        st.secrets["GITHUB_EMAIL"]
-        st.secrets["GITHUB_TOKEN"]
-        st.secrets["REPO_URL"]
         if "GITHUB_USERNAME" in st.secrets and "GITHUB_EMAIL" in st.secrets and "GITHUB_TOKEN" in st.secrets and "REPO_URL" in st.secrets:
             
             # upload button and trigger github upload push

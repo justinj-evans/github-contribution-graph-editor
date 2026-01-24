@@ -59,3 +59,26 @@ def safe_date_dict_merge(source_dict:dict, supplied_dict: dict):
     # missing API dates will simply remain as 0 in the source dict
     [source_dict.update({k:v}) for k,v in supplied_dict.items()]
     return source_dict
+
+def subtract_date_dicts(dict1: dict, dict2: dict) -> dict:
+    """Subtract values of dict2 from dict1 for matching keys.
+
+    Args:
+        dict1 (dict): The minuend dictionary.
+        dict2 (dict): The subtrahend dictionary.
+
+    Returns:
+        dict: A new dictionary with the same keys as dict1, where each value is the result of
+              subtracting the corresponding value in dict2 from dict1. If a key from dict1
+              does not exist in dict2, its value remains unchanged.
+    """
+    result_dict = {}
+    for key in dict1:
+        value1 = dict1.get(key, 0)
+        value2 = dict2.get(key, 0)
+        result_dict[key] = value1 - value2
+    
+    # business rule to remove zero-value entries
+    cleaned_data = {k: v for k, v in result_dict.items() if v != 0}
+
+    return cleaned_data

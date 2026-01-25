@@ -15,10 +15,12 @@ st.title("GitHub Contribution Graph Editor")
 st.set_page_config(layout="wide")
 
 ## Data Structure : Dict of Dates to Counts
+DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+
 if "commit_date_counts" not in st.session_state:
     st.session_state.commit_date_counts = year_dict()
     st.session_state.commit_matrix = dict_to_matrix(st.session_state.commit_date_counts)
-    st.session_state.commit_df = pd.DataFrame(st.session_state.commit_matrix[1:,:])  # exclude empty top row
+    st.session_state.commit_df = pd.DataFrame(st.session_state.commit_matrix[:,:], index=DAYS)  # exclude empty top row
 
 ## User Input Variables
 # Github Username
@@ -35,10 +37,13 @@ if submitted and st.session_state.github_username:
             st.error(f"Failed to fetch data for user: {st.session_state.github_username}. Please check the username and try again.", icon="❌")
         elif response != {}:
             st.session_state.api_date_dict = convert_api_response_to_dict(response) 
-            st.success(f"Successfully pulled {sum(st.session_state.commit_date_counts.values())} contributions user: {st.session_state.github_username}", icon="✅")
+            st.success(f"Successfully pulled {sum(st.session_state.api_date_dict.values())} contributions user: {st.session_state.github_username}", icon="✅")
             st.session_state.commit_date_counts = safe_date_dict_merge(st.session_state.commit_date_counts, st.session_state.api_date_dict)
+            print(f'Post-merge counts: {st.session_state.commit_date_counts}')
             st.session_state.commit_matrix = dict_to_matrix(st.session_state.commit_date_counts)
-            st.session_state.commit_df = pd.DataFrame(st.session_state.commit_matrix[1:,:])  # exclude empty top row
+            st.session_state.commit_df = pd.DataFrame(st.session_state.commit_matrix[:,:], index=DAYS)  # exclude empty top row
+            print(st.session_state.commit_df)
+            print(f'API counts: {sum(st.session_state.api_date_dict.values())}')
 
 with st.container(border=False):
 
@@ -81,11 +86,13 @@ st.session_state.interactive_commit_df = st.data_editor(
 ## Display Commit Graph
 st.subheader("")
 
+
 # convert df to np array expected in plot_commit_graph
 st.session_state.commit_matrix = df_to_matrix(st.session_state.interactive_commit_df)
 
 # convert df back to dict of date: counts
-st.session_state.commit_date_counts = matrix_to_dict(st.session_state.commit_matrix, year= datetime.now().date().year)
+st.session_state.commit_date_counts = matrix_to_dict(st.session_state.commit_matrix)
+print(f'Total counts after df to dict: {sum(st.session_state.commit_date_counts.values())}')
 
 # plot the committed data
 fig = plot_commit_graph(st.session_state.commit_matrix)
@@ -98,8 +105,8 @@ st.session_state.submit_commit_date_count = subtract_date_dicts(dict1=st.session
 ## Metrics Display
 st.metric(label="Total Contributions", value=sum(st.session_state.commit_date_counts.values()))
 st.metric(label="Manual Contributions Added", value=sum(st.session_state.submit_commit_date_count.values()))
-print(sum(st.session_state.submit_commit_date_count.values()))
-print(sum(st.session_state.commit_date_counts.values()))
+print(f'Submit date counts: {sum(st.session_state.submit_commit_date_count.values())}'  )
+print(f'Commit date counts: {sum(st.session_state.commit_date_counts.values())}')
 
 ## Upload to Gitlab
 st.subheader("Upload to GitHub Repository")

@@ -130,7 +130,8 @@ def convert_grid_to_dates(data) -> list:
 
     # Step 1: Define the start date (must be a Sunday)
     one_year_ago = datetime.now() - timedelta(days=365)
-    start_date = one_year_ago - timedelta(days=one_year_ago.weekday() + 1 % 7)
+    # Fix operator precedence: calculate (weekday + 1) % 7 to find Sunday
+    start_date = one_year_ago - timedelta(days=(one_year_ago.weekday() + 1) % 7)
 
     # Step 2: Map dates
     dates = []

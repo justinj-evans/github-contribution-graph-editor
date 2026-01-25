@@ -1,6 +1,9 @@
 from datetime import datetime, timedelta
 import requests
 import pandas as pd
+import logging
+
+logger = logging.getLogger(__name__)
 
 def year_dict() -> dict:
     """
@@ -23,6 +26,8 @@ def year_dict() -> dict:
         day = start_of_week + timedelta(days=i)
         date_dict[day.strftime("%Y-%m-%d")] = 0
 
+    logger.debug(f"Generated year_dict with {len(date_dict)} dates")
+    assert len(date_dict) == 364, f"year_dict should have exactly 364 entries, got {len(date_dict)}"
     return date_dict
 
 def github_contribution_api(username: str, year: str = "last") -> dict:
@@ -52,6 +57,7 @@ def convert_api_response_to_dict(resp: dict) -> dict:
     for index, row in df.iterrows():
         date_dict[row['date']] = row['count']
 
+    logger.debug(f"Converted API response to dict with {len(date_dict)} dates")
     return date_dict
 
 def safe_date_dict_merge(source_dict:dict, supplied_dict: dict):
@@ -80,5 +86,6 @@ def subtract_date_dicts(dict1: dict, dict2: dict) -> dict:
     
     # business rule to remove zero-value entries
     cleaned_data = {k: v for k, v in result_dict.items() if v != 0}
-
+    
+    logger.debug(f"Subtracted dicts: {len(dict1)} - {len(dict2)} = {len(cleaned_data)} non-zero entries")
     return cleaned_data

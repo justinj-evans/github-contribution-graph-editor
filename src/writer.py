@@ -3,6 +3,9 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
 import calendar
 from datetime import datetime, timedelta
+import logging
+
+logger = logging.getLogger(__name__)
 
 from map import get_letter_map
 
@@ -46,15 +49,19 @@ def apply_letter_overlay(grid, text):
 
 
 def plot_commit_graph(grid):
+    print("Plotting commit graph")
+    logger.debug(f"Generated year_dict with {grid.shape} dates")
+    assert len(grid.shape) == 2 and grid.shape[0] == 7 and grid.shape[1] == 52
+
     """Plot the commit graph with text overlay"""
     fig, ax = plt.subplots(figsize=(13, 3))
 
     # Plot each grid cell
-    for y in range(grid.shape[0]):
+    for y in range(grid.shape[0]+1): # 0-7 plus one for zero row
         for x in range(grid.shape[1]):
             # Safely map grid value to a color index to avoid IndexError
             try:
-                val = int(grid[y, x])
+                val = int(grid[y-1, x])
             except Exception:
                 val = 0
             idx = min(max(val, 0), len(COLORS) - 1)
@@ -117,38 +124,3 @@ def plot_commit_graph(grid):
     #plt.show()
     return fig
 
-
-def convert_grid_to_dates(data) -> list:
-    """
-    Convert a 7x52 grid of commit data into a list of dates and values.
-    The grid is assumed to represent weeks, with each column being a week
-    and each row being a day (Sunday to Saturday).
-
-    Returns:
-        dates: a list of tuples [(date_str, value)], where date_str is in ISO format
-    """
-
-    # Step 1: Define the start date (must be a Sunday)
-    one_year_ago = datetime.now() - timedelta(days=365)
-    start_date = one_year_ago - timedelta(days=one_year_ago.weekday() + 1 % 7)
-
-    # Step 2: Map dates
-    dates = []
-    commit_dates = []
-    # data is expected shape (rows=days, cols=weeks)
-    rows = data.shape[0]
-    cols = data.shape[1]
-    for col in range(cols):  # iterate over weeks
-        for row in range(rows):  # iterate over days (Sunday to Saturday)
-            day_offset = col * 7 + row
-            date = start_date + timedelta(days=day_offset)
-            commit_date_str = date.strftime("%Y-%m-%dT%H:%M:%S")  # FIXED format
-            try:
-                value = int(data[row, col])
-            except Exception:
-                value = 0
-            dates.append((commit_date_str, value))
-            if value > 0:
-                commit_dates.append((commit_date_str, value))
-
-    return commit_dates

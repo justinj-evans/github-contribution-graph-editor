@@ -2,11 +2,17 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 from datetime import datetime
+import logging
 
 from writer import plot_commit_graph
 from grid import dict_to_matrix, matrix_to_dict, df_to_matrix
 from dates import year_dict, github_contribution_api, convert_api_response_to_dict, safe_date_dict_merge, subtract_date_dicts
 from github_interaction import github_upload_commits
+
+# logging.basicConfig(
+#     level=logging.DEBUG,
+#     format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
+# )
 
 # # Streamlit app
 st.title("GitHub Contribution Graph Editor")
@@ -18,6 +24,7 @@ st.set_page_config(layout="wide")
 DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
 
 if "commit_date_counts" not in st.session_state:
+    print('Initializing blank year of commits')
     st.session_state.commit_date_counts = year_dict()
     st.session_state.commit_matrix = dict_to_matrix(st.session_state.commit_date_counts)
     st.session_state.commit_df = pd.DataFrame(st.session_state.commit_matrix[:,:], index=DAYS)  # exclude empty top row
@@ -39,10 +46,8 @@ if submitted and st.session_state.github_username:
             st.session_state.api_date_dict = convert_api_response_to_dict(response) 
             st.success(f"Successfully pulled {sum(st.session_state.api_date_dict.values())} contributions user: {st.session_state.github_username}", icon="✅")
             st.session_state.commit_date_counts = safe_date_dict_merge(st.session_state.commit_date_counts, st.session_state.api_date_dict)
-            print(f'Post-merge counts: {st.session_state.commit_date_counts}')
             st.session_state.commit_matrix = dict_to_matrix(st.session_state.commit_date_counts)
             st.session_state.commit_df = pd.DataFrame(st.session_state.commit_matrix[:,:], index=DAYS)  # exclude empty top row
-            print(st.session_state.commit_df)
             print(f'API counts: {sum(st.session_state.api_date_dict.values())}')
 
 with st.container(border=False):
@@ -51,6 +56,7 @@ with st.container(border=False):
     v1, v2 = st.columns(2,gap='small')
     with v1:
         if st.button("Random Fill Contributions"):
+            print('Generating random contributions')
             st.session_state.commit_df = pd.DataFrame(
                 np.random.randint(0, 4, size=(7, 52))
             )
@@ -58,6 +64,7 @@ with st.container(border=False):
     # reset commit graph data
     with v2:
         if st.button("Reset Contribution Graph"):
+            print('Resetting contribution graph to zero')
             st.session_state.commit_df = pd.DataFrame([
                 [0]*52 for _ in range(7)
             ])
@@ -92,7 +99,6 @@ st.session_state.commit_matrix = df_to_matrix(st.session_state.interactive_commi
 
 # convert df back to dict of date: counts
 st.session_state.commit_date_counts = matrix_to_dict(st.session_state.commit_matrix)
-print(f'Total counts after df to dict: {sum(st.session_state.commit_date_counts.values())}')
 
 # plot the committed data
 fig = plot_commit_graph(st.session_state.commit_matrix)
@@ -104,9 +110,7 @@ st.session_state.submit_commit_date_count = subtract_date_dicts(dict1=st.session
 
 ## Metrics Display
 st.metric(label="Total Contributions", value=sum(st.session_state.commit_date_counts.values()))
-st.metric(label="Manual Contributions Added", value=sum(st.session_state.submit_commit_date_count.values()))
-print(f'Submit date counts: {sum(st.session_state.submit_commit_date_count.values())}'  )
-print(f'Commit date counts: {sum(st.session_state.commit_date_counts.values())}')
+st.metric(label="Manual Contributions Edited", value=sum(st.session_state.submit_commit_date_count.values()))
 
 ## Upload to Gitlab
 st.subheader("Upload to GitHub Repository")

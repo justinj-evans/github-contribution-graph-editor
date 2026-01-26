@@ -8,7 +8,8 @@ logger = logging.getLogger(__name__)
 def df_to_matrix(df):
     # convert a DataFrame to a numpy matrix
     matrix = df.values
-    print(f"df to matrix shape: {matrix.shape}")
+    logging.debug(f"Converting DataFrame of shape {df.shape} to matrix")
+    assert len(matrix.shape) == 2 and matrix.shape[0] == 7 and matrix.shape[1] == 52, f"DataFrame should convert to shape (7, 52), got {matrix.shape}"
     return matrix
 
 
@@ -29,9 +30,11 @@ def dict_to_matrix(date_dict):
         week = (d - start_date).days // 7
         weekday = (d.weekday() + 1) % 7  # Sunday = 0
         matrix[weekday, week] = date_dict.get(d.date().strftime("%Y-%m-%d"), 0) # althrough this is a datetime dict, everything stored as string
-    
-    print(f"dict to matrix shape: {matrix.shape}")
+
+    logging.debug(f"Converting date-dictionary of shape {len(date_dict)} to matrix")
+    assert len(matrix.shape) == 2 and matrix.shape[0] == 7 and matrix.shape[1] == 52, f"DataFrame should convert to shape (7, 52), got {matrix.shape}"
     return matrix
+
 
 def matrix_to_dict(matrix):
     end_date = pd.Timestamp.today().normalize()

@@ -15,7 +15,7 @@ from github_interaction import github_upload_commits
 # )
 
 # # Streamlit app
-st.title("GitHub Contribution Graph Editor")
+st.sidebar.title("GitHub Contribution Graph Editor")
 
 # streamlit setup variables
 st.set_page_config(layout="wide")
@@ -31,8 +31,8 @@ if "commit_date_counts" not in st.session_state:
 
 ## User Input Variables
 # Github Username
-with st.form("github_username_form", clear_on_submit=False):
-    username = st.text_input("GitHub Username:", key="github_username", on_change=None)
+with st.sidebar.form("github_username_form", clear_on_submit=False):
+    username = st.text_input(label="Your GitHub Username",key="github_username", on_change=None)
     submitted = st.form_submit_button("Submit")
 
 if "api_date_dict" not in st.session_state:
@@ -41,16 +41,16 @@ if submitted and st.session_state.github_username:
     with st.spinner("Pulling commit history..."):
         response = github_contribution_api(st.session_state.github_username)
         if 'error' in response:
-            st.error(f"Failed to fetch data for user: {st.session_state.github_username}. Please check the username and try again.", icon="❌")
+            st.sidebar.error(f"Failed to fetch data for user: {st.session_state.github_username}. Please check the username and try again.", icon="❌")
         elif response != {}:
             st.session_state.api_date_dict = convert_api_response_to_dict(response) 
-            st.success(f"Successfully pulled {sum(st.session_state.api_date_dict.values())} contributions user: {st.session_state.github_username}", icon="✅")
+            st.sidebar.success(f"Successfully pulled {sum(st.session_state.api_date_dict.values())} contributions user: {st.session_state.github_username}", icon="✅")
             st.session_state.commit_date_counts = safe_date_dict_merge(st.session_state.commit_date_counts, st.session_state.api_date_dict)
             st.session_state.commit_matrix = dict_to_matrix(st.session_state.commit_date_counts)
             st.session_state.commit_df = pd.DataFrame(st.session_state.commit_matrix[:,:], index=DAYS)  # exclude empty top row
-            print(f'API counts: {sum(st.session_state.api_date_dict.values())}')
+            print(f'API Pulled Commits: {sum(st.session_state.api_date_dict.values())}')
 
-with st.container(border=False):
+with st.sidebar.container(border=False):
 
     # random fill toggle
     v1, v2 = st.columns(2,gap='small')
@@ -63,16 +63,16 @@ with st.container(border=False):
 
     # reset commit graph data
     with v2:
-        if st.button("Reset Contribution Graph"):
+        if st.button("Reset Contribution"):
             print('Resetting contribution graph to zero')
             st.session_state.commit_df = pd.DataFrame([
                 [0]*52 for _ in range(7)
             ])
             st.session_state.commit_date_counts = year_dict()
+            st.session_state.api_date_dict = {}
 
 ## Editable DataFrame
-st.subheader("Manually Edit")
-st.write("Edit the number of contributions (0-4) for each day in the grid below:")
+st.write("Manually add contributions (0-4) for each day in the grid below")
 
 ## display editable dataframe
 st.session_state.interactive_commit_df = st.data_editor(
@@ -91,8 +91,6 @@ st.session_state.interactive_commit_df = st.data_editor(
 )
 
 ## Display Commit Graph
-st.subheader("")
-
 
 # convert df to np array expected in plot_commit_graph
 st.session_state.commit_matrix = df_to_matrix(st.session_state.interactive_commit_df)
@@ -109,11 +107,15 @@ st.session_state.submit_commit_date_count = subtract_date_dicts(dict1=st.session
                                                                 dict2=st.session_state.api_date_dict)
 
 ## Metrics Display
-st.metric(label="Total Contributions", value=sum(st.session_state.commit_date_counts.values()))
-st.metric(label="Manual Contributions Edited", value=sum(st.session_state.submit_commit_date_count.values()))
+with st.sidebar.container(border=False):
+
+    # random fill toggle
+    l1, l2 = st.sidebar.columns(2,gap='small')
+    l1.metric(label="Total Contributions", value=sum(st.session_state.commit_date_counts.values()))
+    l2.metric(label="Manual Added", value=sum(st.session_state.submit_commit_date_count.values()))
 
 ## Upload to Gitlab
-st.subheader("Upload to GitHub Repository")
+#st.sidebar.subheader("Upload to GitHub Repository")
 
 if sum(st.session_state.commit_date_counts.values()) > 0:
     # check to see if streamlit secrets are set
@@ -121,7 +123,7 @@ if sum(st.session_state.commit_date_counts.values()) > 0:
         if "GITHUB_USERNAME" in st.secrets and "GITHUB_EMAIL" in st.secrets and "GITHUB_TOKEN" in st.secrets and "REPO_URL" in st.secrets:
             
             # upload button and trigger github upload push
-            if st.button("Upload to Github Repository"):
+            if st.sidebar.button("Upload to Github Repository"):
                 with st.spinner("Generating commits..."):
 
                     # Calculate the commits to submit: user modifications (current - api)
@@ -139,13 +141,13 @@ if sum(st.session_state.commit_date_counts.values()) > 0:
                                         GIT_EMAIL=GIT_EMAIL,
                                         REPO_URL=st.secrets["REPO_URL"],
                                         commit_date_counts=st.session_state.submit_commit_date_count)
-                    st.success("Commits uploaded successfully!", icon="✅")
+                    st.sidebar.success("Commits uploaded successfully!", icon="✅")
         else:
-            st.warning("GitHub credentials not found in Streamlit secrets. Please add GITHUB_USERNAME, GITHUB_EMAIL, GITHUB_TOKEN, and REPO_URL to .streamlit/secrets.toml", icon="⚠️")
+            st.sidebar.warning("GitHub credentials not found in Streamlit secrets. Please add GITHUB_USERNAME, GITHUB_EMAIL, GITHUB_TOKEN, and REPO_URL to .streamlit/secrets.toml", icon="⚠️")
     except:
-        st.warning("Please ensure Github credentials are properly configured in .streamlit/secrets.toml", icon="⚠️")
+        st.sidebar.warning("Please ensure Github credentials are properly configured in .streamlit/secrets.toml", icon="⚠️")
 else:
-    st.info("Add at least one contribution required to enable upload to Github Repository.", icon="ℹ️")
+    st.sidebar.info("Add at least one contribution required to enable upload to Github Repository.", icon="ℹ️")
 
 
 

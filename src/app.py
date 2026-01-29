@@ -44,10 +44,10 @@ if submitted and st.session_state.github_username:
     with st.spinner("Pulling commit history..."):
         response = github_contribution_api(st.session_state.github_username)
         if 'error' in response:
-            st.sidebar.error(f"Failed to fetch data for user: {st.session_state.github_username}. Please check the username and try again.", icon="❌")
+            st.toast(f"Failed to fetch data for user: {st.session_state.github_username}. Please check the username and try again.", icon="❌")
         elif response != {}:
             st.session_state.api_date_dict = convert_api_response_to_dict(response) 
-            st.sidebar.success(f"Successfully pulled {sum(st.session_state.api_date_dict.values())} contributions user: {st.session_state.github_username}", icon="✅")
+            st.toast(f"Successfully pulled {sum(st.session_state.api_date_dict.values())} for user: {st.session_state.github_username}", icon="✅")
             st.session_state.commit_date_counts = safe_date_dict_merge(st.session_state.commit_date_counts, st.session_state.api_date_dict)
             st.session_state.commit_matrix = dict_to_matrix(st.session_state.commit_date_counts)
             st.session_state.commit_df = pd.DataFrame(st.session_state.commit_matrix[:,:], index=DAYS)  # exclude empty top row

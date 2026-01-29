@@ -3,6 +3,8 @@ import pandas as pd
 import numpy as np
 from datetime import datetime
 import logging
+import matplotlib.pyplot as plt
+from io import BytesIO
 
 from writer import plot_commit_graph
 from grid import dict_to_matrix, matrix_to_dict, df_to_matrix
@@ -102,6 +104,18 @@ st.session_state.commit_date_counts = matrix_to_dict(st.session_state.commit_mat
 # plot the committed data
 fig = plot_commit_graph(st.session_state.commit_matrix)
 st.pyplot(fig)
+
+## Download Plot
+# convert fig to png for download
+buf = BytesIO()
+fig.savefig(buf, format='png')
+
+st.sidebar.download_button(
+    label="Download Graph",
+    data=buf.getvalue(),
+    file_name="contribution_graph.png",
+    mime="image/png"
+)
 
 ## Prepare Commits
 st.session_state.submit_commit_date_count = subtract_date_dicts(dict1=st.session_state.commit_date_counts, 

@@ -66,7 +66,7 @@ with st.sidebar.container(border=False):
 
     # reset commit graph data
     with v2:
-        if st.button("Reset Contribution"):
+        if st.button("Reset Contributions"):
             print('Resetting contribution graph to zero')
             st.session_state.commit_df = pd.DataFrame([
                 [0]*52 for _ in range(7)
@@ -127,7 +127,7 @@ with st.sidebar.container(border=False):
     # random fill toggle
     l1, l2 = st.sidebar.columns(2,gap='small')
     l1.metric(label="Total Contributions", value=sum(st.session_state.commit_date_counts.values()))
-    l2.metric(label="Manual Added", value=sum(st.session_state.submit_commit_date_count.values()))
+    l2.metric(label="Manually Added", value=sum(st.session_state.submit_commit_date_count.values()))
 
 ## Upload to Gitlab
 #st.sidebar.subheader("Upload to GitHub Repository")

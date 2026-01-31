@@ -1,14 +1,14 @@
 # GitHub Contribution Graph Editor
 
-Customize patterns and messages on your GitHub contribution graph. This project provides an interactive Streamlit web app for designing and uploading commits that form visual patterns on your GitHub profile.
+Design and upload a unique Github contribution graph that makes your Github profile stand out.
 
-![](docs/contribution_graph_heart.png)
+![](docs/contribution_graph_terminal.png)
 
 ## Features
 
-- **Interactive Web App**: Use the Streamlit interface to manually edit contribution grids or generate random patterns
-- **Visualization**: Preview your contribution graph before uploading
-- **GitHub Integration**: Automatically upload commits to your repository to update your contribution graph
+- **Interactive Web App**: Simple Streamlit interface allows you to generate unique patterns
+- **GitHub Integration**: Automatically upload commit designs to your repository
+- **Profile enhancement**: Improve visual appeal and have fun with your Github profile
 
 ## Installation
 

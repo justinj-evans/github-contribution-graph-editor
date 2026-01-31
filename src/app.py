@@ -17,7 +17,7 @@ from github_interaction import github_upload_commits
 # )
 
 # # Streamlit app
-st.sidebar.image("docs\\contribution_icon.PNG", width='stretch')
+st.sidebar.image("docs\contribution_icon.PNG", width='stretch')
 st.sidebar.title("GitHub Contribution Graph Editor")
 
 # streamlit setup variables
